@@ -1,30 +1,23 @@
-from telegram import Bot, Update
-from telegram.ext import Dispatcher, CommandHandler
-import os
+from telegram import Update
+from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 from flask import Flask, request
-import telegram
+import os
 
 app = Flask(__name__)
 
-TOKEN = os.getenv("BOT_TOKEN")
-CHANNEL_LINK = os.getenv("CHANNEL_LINK")
+BOT_TOKEN = os.environ.get("BOT_TOKEN")
+CHANNEL_LINK = os.environ.get("CHANNEL_LINK")
 
-bot = telegram.Bot(token=TOKEN)
+application = ApplicationBuilder().token(BOT_TOKEN).build()
 
-@app.route("/")
-def home():
-    return "Bot is running!"
+# Comando de teste
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(f"Olá! Acesse nosso canal VIP: {CHANNEL_LINK}")
 
-@app.route("/webhook", methods=["POST"])
-def webhook():
-    update = telegram.Update.de_json(request.get_json(force=True), bot)
-    chat_id = update.message.chat.id
+application.add_handler(CommandHandler("start", start))
 
-    # Simulação de pagamento aprovado
-    bot.send_message(chat_id=chat_id, text="✅ Pagamento confirmado! Bem-vindo ao VIP!")
-    bot.send_message(chat_id=chat_id, text=f"👉 Acesse o canal VIP: {CHANNEL_LINK}")
-
-    return "ok"
-
-if __name__ == "__main__":
-    app.run(debug=True)
+# Inicializa o bot em segundo plano
+async def run_bot():
+    await application.initialize()
+    await application.start()
+    await application.updater.
