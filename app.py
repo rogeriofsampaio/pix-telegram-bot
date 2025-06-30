@@ -4,20 +4,20 @@ from flask import Flask
 import os
 import threading
 
-# Flask app para manter Render vivo
+# Flask para manter vivo no Render
 flask_app = Flask(__name__)
 
 @flask_app.route("/")
 def home():
-    return "Bot rodando!"
+    return "Bot está rodando!"
 
 # Variáveis ambiente
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 CHANNEL_LINK = os.environ.get("CHANNEL_LINK")
 
-# Comando /start
+# Comando start
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(f"Olá! Entre no canal VIP: {CHANNEL_LINK}")
+    await update.message.reply_text(f"Olá! Para acessar o canal VIP clique: {CHANNEL_LINK}")
 
 # Função para rodar o bot
 def run_telegram_bot():
@@ -25,7 +25,7 @@ def run_telegram_bot():
     app.add_handler(CommandHandler("start", start))
     app.run_polling()
 
-# Rodar bot numa thread separada
+# Executar em thread separada
 threading.Thread(target=run_telegram_bot).start()
 
 if __name__ == "__main__":
