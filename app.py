@@ -20,13 +20,17 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(f"Olá! Para acessar o canal VIP clique: {CHANNEL_LINK}")
 
 # Função para rodar o bot
-def run_telegram_bot():
+async def run_telegram_bot():
     app = ApplicationBuilder().token(BOT_TOKEN).build()
     app.add_handler(CommandHandler("start", start))
-    app.run_polling()
+    await app.run_polling()
 
 # Executar em thread separada
-threading.Thread(target=run_telegram_bot).start()
+def run_bot_thread():
+    import asyncio
+    asyncio.run(run_telegram_bot())
+
+threading.Thread(target=run_bot_thread).start()
 
 if __name__ == "__main__":
     flask_app.run(host="0.0.0.0", port=10000)
