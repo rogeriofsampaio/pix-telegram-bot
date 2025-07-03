@@ -1,32 +1,35 @@
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
-from flask import Flask
+from flask import Flask, request
 import os
-import asyncio
 
-# Flask app
-flask_app = Flask(__name__)
+app = Flask(__name__)
 
-@flask_app.route("/")
-def home():
-    return "Bot está rodando!"
-
-# Variáveis ambiente
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 CHANNEL_LINK = os.environ.get("CHANNEL_LINK")
 
-# Comando /start
+application = ApplicationBuilder().token(BOT_TOKEN).build()
+
+# Comando de teste
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(f"Olá! Para acessar o canal VIP clique: {CHANNEL_LINK}")
+    await update.message.reply_text(f"Olá! Acesse nosso canal VIP: {CHANNEL_LINK}")
 
-# Função que inicia o bot
-async def run_telegram_bot():
-    app = ApplicationBuilder().token(BOT_TOKEN).build()
-    app.add_handler(CommandHandler("start", start))
-    await app.run_polling()
+application.add_handler(CommandHandler("start", start))
 
-# Ao subir o Flask, dispara o bot em segundo plano
+# Inicializa o bot em segundo plano
+async def run_bot():
+    await application.initialize()
+    await application.start()
+    await application.updater.start_polling()
+    await application.updater.idle()
+
+import asyncio
+asyncio.get_event_loop().create_task(run_bot())
+
+# Flask para manter o Render feliz
+@app.route("/")
+def home():
+    return "Bot rodando!"
+
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.create_task(run_telegram_bot())
-    flask_app.run(host="0.0.0.0", port=10000)
+    app.run(host="0.0.0.0", port=10000)
